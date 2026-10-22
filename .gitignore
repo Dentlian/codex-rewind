@@ -1,0 +1,33 @@
+# Installed/modified vendor software, local extraction and generated output
+dist/
+.work/
+node_modules/
+__pycache__/
+*.py[cod]
+*.asar
+*.exe
+*.dll
+*.pdb
+*.log
+*.zip
+*.7z
+# Credentials, account/config data, conversations, rollback receipts
+.env
+.env.*
+!.env.example
+.codex/
+auth.json
+config.toml
+*.sqlite*
+*.db
+*.jsonl
+live-rewind-*.json
+rewind-ui-profile/
+.codex-rewind-backups/
+*.pem
+*.key
+# Editor state
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

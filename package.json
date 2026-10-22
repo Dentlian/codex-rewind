@@ -1,0 +1,11 @@
+{
+  "name": "codex-rewind",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local Codex rewind menu patch with AI-assisted operation rollback",
+  "scripts": {
+    "test": "node tests/test-rewind.cjs",
+    "test:menu": "node tests/test-menu.cjs",
+    "test:live": "node tests/live-rewind.cjs"
+  }
+}
