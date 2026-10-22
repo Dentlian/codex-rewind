@@ -4,6 +4,7 @@
   const managers = new Map();
   const active = new Map();
   const prefix = 'CODEX_REWIND_RESULT_';
+  let nativeSaveCopy = null;
 
   function inputText(turn) {
     return (turn?.params?.input || []).filter(x => x.type === 'text').map(x => x.text || '').join('\n');
@@ -47,14 +48,16 @@
       });
     } finally { db.close(); }
   }
-  function download(record) {
-    const blob = new Blob([JSON.stringify(record, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = root.document.createElement('a');
-    a.href = url;
-    a.download = `codex-rewind-${record.id}.json`;
-    a.click();
-    root.setTimeout(() => URL.revokeObjectURL(url), 30000);
+  async function exportRecord(record) {
+    if (!nativeSaveCopy) throw Error('当前客户端没有可用的文件保存接口，请使用已更新的回退版。');
+    const fileName = `codex-rewind-${String(record.id).replace(/[^a-zA-Z0-9_-]/g, '_')}.json`;
+    const bytes = new TextEncoder().encode(JSON.stringify(record, null, 2) + '\n');
+    const result = await nativeSaveCopy({ fileName, bytes });
+    if (result?.path === null) return { cancelled: true };
+    if (typeof result?.path !== 'string' || result.path.length === 0) {
+      throw Error('客户端未确认文件保存结果，请重试。');
+    }
+    return { cancelled: false, path: result.path };
   }
   function statusPanel(record, cancel) {
     if (!root.document) return { update() {} };
@@ -71,13 +74,30 @@
     stop.onclick = cancel;
     const exportButton = root.document.createElement('button');
     exportButton.textContent = '导出恢复记录';
-    exportButton.onclick = () => download(record);
+    const exportStatus = root.document.createElement('div');
+    exportStatus.setAttribute('role', 'status');
+    exportStatus.style.cssText = 'margin-top:8px;white-space:pre-wrap;overflow-wrap:anywhere;';
+    exportButton.onclick = async () => {
+      if (exportButton.disabled) return;
+      exportButton.disabled = true;
+      exportButton.textContent = '正在导出…';
+      exportStatus.textContent = '请选择恢复记录的保存位置。';
+      try {
+        const result = await exportRecord(record);
+        exportStatus.textContent = result.cancelled ? '已取消导出，恢复记录仍保留在本机。' : `已保存到：${result.path}`;
+      } catch (error) {
+        exportStatus.textContent = `导出失败：${String(error?.message || error)}\n恢复记录未删除，可以重试。`;
+      } finally {
+        exportButton.disabled = false;
+        exportButton.textContent = '导出恢复记录';
+      }
+    };
     const close = root.document.createElement('button');
     close.textContent = '关闭';
     close.hidden = true;
     close.onclick = () => panel.remove();
     for (const b of [stop, exportButton, close]) b.style.cssText = 'margin:4px 8px 0 0;padding:4px 9px;border:1px solid #8886;border-radius:6px;cursor:pointer;';
-    panel.append(title, body, stop, exportButton, close);
+    panel.append(title, body, stop, exportButton, close, exportStatus);
     root.document.body.appendChild(panel);
     return {
       update(message, done = false, success = false) {
@@ -213,7 +233,9 @@
     }
   }
   const api = {
-    version: '0.1.0',
+    version: '0.1.1',
+    setSaveCopy(saveCopy) { nativeSaveCopy = typeof saveCopy === 'function' ? saveCopy : null; },
+    exportRecord,
     registerManager(threadId, manager) { if (manager.getHostId() === 'local') managers.set(threadId, manager); },
     canRun, run, buildPrompt, parseResult, inputText, assistantText,
     getActive(threadId) { return active.get(threadId) || null; }

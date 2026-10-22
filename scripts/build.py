@@ -78,7 +78,7 @@ def build(source, target, prepare_only=False):
     (app / 'ChatGPT.exe').write_bytes(binary.replace(SUPPORTED_HEADER_SHA256.encode(), digest.encode(), 1))
     shutil.copy2(PROJECT / 'scripts/launch-rewind.cmd', target / 'launch-rewind.cmd')
     (target / 'build-info.json').write_text(json.dumps({
-        'rewindVersion': '0.1.0', 'supportedWindowsPackage': '26.1016.8120.0',
+        'rewindVersion': '0.1.1', 'supportedWindowsPackage': '26.1016.8120.0',
         'asarHeaderSha256': digest, 'changedResources': list(replacements),
         'officialSignedDistribution': False,
     }, indent=2) + '\n', encoding='utf-8')
