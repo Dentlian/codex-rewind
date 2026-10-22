@@ -26,6 +26,11 @@ def patch_sources():
         'getConversation(e){globalThis.__codexRewind?.registerManager(e,this);return this.threadStore.getConversation(e)}')
     # ESM module initialization finishes before any conversation manager is created.
     initial += '\n;' + controller + '\n'
+    # Reuse the exact save-copy service and RPC result unwrapping used by built-in image/audio export.
+    initial += ''';globalThis.__codexRewind.setSaveCopy(async request => {
+      if (Js?.workspaceFiles?.saveCopy == null) throw Error("客户端文件保存接口不可用");
+      return await vl(Js.workspaceFiles.saveCopy(request));
+    });\n'''
     menu = (base / MENU).read_text(encoding='utf-8')
     menu = replace_once(menu,
         'renderUsedSkillsDetails:j,forkDisabled:I,forkLabel:ie,isForking:L,onFork:y,open:te,onOpenChange:ne}',
