@@ -6,6 +6,12 @@
 
 **这是实验性的非官方补丁。仓库仅提供补丁代码和工具，不分发 Codex 安装包、修改版二进制、账号数据或聊天记录。**
 
+## Codex++ 集成
+
+本项目的轮次回退功能已通过 [Codex++ PR #2686](https://github.com/BigPizzaV3/CodexPlusPlus/pull/2686) 集成到 Codex++，并列入 [v1.12.0 发布说明](https://github.com/BigPizzaV3/CodexPlusPlus/releases/tag/v1.12.0)。Codex++ 将其标为**实验性、默认关闭**；使用方式和限制请以 [Codex++ 的轮次回退文档](https://github.com/BigPizzaV3/CodexPlusPlus/blob/v1.12.0/docs/turn-rewind.md)为准。
+
+本仓库保留针对下述特定 Windows Codex 版本的独立补丁和构建工具。Codex++ 中的集成实现经过适配，不需要套用这里的独立补丁。
+
 ## 兼容范围
 
 - 已适配 Windows 包版本 `26.1016.8120.0`，应用内部版本 `26.1016.61520`。
